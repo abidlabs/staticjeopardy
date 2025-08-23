@@ -67,6 +67,7 @@ function renderBoard() {
             <input type="text" 
                    value="${gameData.categories[i]}" 
                    placeholder="Category ${i + 1}"
+                   onfocus="clearDefaultCategory(this, ${i})"
                    onchange="updateCategory(${i}, this.value)">
         `;
         categoriesRow.appendChild(catDiv);
@@ -104,6 +105,13 @@ function renderBoard() {
     }
 }
 
+function clearDefaultCategory(input, index) {
+    // Clear the input if it contains the default "Category X" text
+    if (input.value === `Category ${index + 1}`) {
+        input.value = '';
+    }
+}
+
 function updateCategory(index, value) {
     gameData.categories[index] = value;
     saveToURL();
@@ -129,6 +137,10 @@ function openCellEditor(cellIndex) {
     
     updateMediaInput();
     document.getElementById('cellModal').style.display = 'block';
+    // Auto-focus on the question textarea
+    setTimeout(() => {
+        document.getElementById('cellQuestion').focus();
+    }, 100);
 }
 
 function closeCellModal() {

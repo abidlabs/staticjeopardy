@@ -37,6 +37,13 @@ function initializeGame() {
         const state = JSON.parse(savedState);
         teams = state.teams || [];
         usedCells = state.usedCells || [];
+    } else {
+        // Initialize with 3 default teams if no saved state
+        teams = [
+            { name: 'Team 1', score: 0 },
+            { name: 'Team 2', score: 0 },
+            { name: 'Team 3', score: 0 }
+        ];
     }
     
     // Set title
@@ -312,12 +319,6 @@ function resetGame() {
 }
 
 // Navigation
-function editGame() {
-    const hash = window.location.hash;
-    const baseURL = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-    window.location.href = baseURL + '/editor.html' + hash;
-}
-
 function shareGame() {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
