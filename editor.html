@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Jeopardy - Editor</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+</head>
+<body>
+    <div class="editor-container">
+        <header class="editor-header">
+            <div class="header-left">
+                <a href="index.html" class="back-link">← Back</a>
+                <h1>Static Jeopardy Editor</h1>
+            </div>
+            <div class="header-right">
+                <button onclick="shareEditor()" class="btn btn-secondary">📋 Copy Editor URL</button>
+                <button onclick="sharePlayer()" class="btn btn-primary">🎮 Copy Player URL</button>
+            </div>
+        </header>
+
+        <div class="editor-main">
+            <div class="game-settings">
+                <input type="text" id="gameTitle" placeholder="Enter Game Title" class="title-input" onchange="saveToURL()">
+                
+                <div class="board-size">
+                    <label>Board Size:</label>
+                    <select id="numCategories" onchange="updateBoardSize()">
+                        <option value="4">4 Categories</option>
+                        <option value="5" selected>5 Categories</option>
+                        <option value="6">6 Categories</option>
+                    </select>
+                    <select id="numQuestions" onchange="updateBoardSize()">
+                        <option value="4">4 Questions</option>
+                        <option value="5" selected>5 Questions</option>
+                        <option value="6">6 Questions</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="board-editor">
+                <div class="categories-row" id="categoriesRow">
+                    <!-- Categories will be generated here -->
+                </div>
+                <div class="questions-grid" id="questionsGrid">
+                    <!-- Question cells will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Cell Editor Modal -->
+        <div id="cellModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Edit Cell</h2>
+                    <span class="close" onclick="closeCellModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Question/Clue:</label>
+                        <textarea id="cellQuestion" rows="3" placeholder="Enter the question or clue"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Answer:</label>
+                        <textarea id="cellAnswer" rows="2" placeholder="Enter the answer"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Media (optional):</label>
+                        <select id="mediaType" onchange="updateMediaInput()">
+                            <option value="none">No Media</option>
+                            <option value="image">Image URL</option>
+                            <option value="video">Video URL</option>
+                            <option value="audio">Audio URL</option>
+                        </select>
+                        <input type="text" id="mediaUrl" placeholder="Enter media URL" style="display:none; margin-top:10px;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isDailyDouble">
+                            Daily Double
+                        </label>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button onclick="saveCellData()" class="btn btn-primary">Save</button>
+                        <button onclick="closeCellModal()" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="editor.js"></script>
+</body>
+</html>

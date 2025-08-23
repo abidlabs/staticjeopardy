@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Jeopardy - Play</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+</head>
+<body>
+    <div class="player-container">
+        <header class="player-header">
+            <div class="header-left">
+                <h1 id="gameTitle">Static Jeopardy</h1>
+            </div>
+            <div class="header-right">
+                <button onclick="editGame()" class="btn btn-secondary">✏️ Edit</button>
+                <button onclick="shareGame()" class="btn btn-secondary">🔗 Share</button>
+                <button onclick="resetGame()" class="btn btn-warning">🔄 Reset</button>
+            </div>
+        </header>
+
+        <div class="game-board">
+            <div class="categories-row" id="categoriesRow">
+                <!-- Categories will be generated here -->
+            </div>
+            <div class="questions-grid" id="questionsGrid">
+                <!-- Question cells will be generated here -->
+            </div>
+        </div>
+
+        <div class="teams-section">
+            <div class="teams-header">
+                <h3>Teams</h3>
+                <button onclick="addTeam()" class="btn btn-small">+ Add Team</button>
+            </div>
+            <div class="teams-container" id="teamsContainer">
+                <!-- Teams will be generated here -->
+            </div>
+        </div>
+
+        <!-- Question Modal -->
+        <div id="questionModal" class="modal">
+            <div class="modal-content question-modal">
+                <div class="modal-header">
+                    <h2 id="questionValue">$200</h2>
+                    <span class="close" onclick="closeQuestionModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="questionContent" class="question-content">
+                        <!-- Question content will be displayed here -->
+                    </div>
+                    <div id="mediaContainer" class="media-container"></div>
+                    <button onclick="showAnswer()" id="showAnswerBtn" class="btn btn-primary">Show Answer</button>
+                    <div id="answerContent" class="answer-content" style="display:none;">
+                        <!-- Answer will be displayed here -->
+                    </div>
+                    <div id="teamButtons" class="team-buttons" style="display:none;">
+                        <!-- Team buttons for scoring will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Double Modal -->
+        <div id="dailyDoubleModal" class="modal">
+            <div class="modal-content daily-double-modal">
+                <div class="modal-header">
+                    <h2>DAILY DOUBLE!</h2>
+                </div>
+                <div class="modal-body">
+                    <p>Select team and wager amount:</p>
+                    <select id="ddTeamSelect" class="team-select">
+                        <!-- Teams will be populated here -->
+                    </select>
+                    <input type="number" id="wagerAmount" placeholder="Enter wager amount" min="0">
+                    <div class="modal-actions">
+                        <button onclick="submitWager()" class="btn btn-primary">Submit Wager</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Team Modal -->
+        <div id="teamModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Add Team</h2>
+                    <span class="close" onclick="closeTeamModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="teamName" placeholder="Enter team name">
+                    <div class="modal-actions">
+                        <button onclick="saveTeam()" class="btn btn-primary">Add Team</button>
+                        <button onclick="closeTeamModal()" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="player.js"></script>
+</body>
+</html>
