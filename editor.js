@@ -68,7 +68,7 @@ function renderBoard() {
                    value="${gameData.categories[i]}" 
                    placeholder="Category ${i + 1}"
                    onfocus="clearDefaultCategory(this, ${i})"
-                   onchange="updateCategory(${i}, this.value)">
+                   oninput="updateCategory(${i}, this.value)">
         `;
         categoriesRow.appendChild(catDiv);
     }
@@ -90,14 +90,27 @@ function renderBoard() {
                 cellDiv.classList.add('daily-double');
             }
             
-            if (cell.question) {
+            // Check if cell has any content (question, answer, or media)
+            const hasContent = cell.question || cell.answer || (cell.mediaType && cell.mediaType !== 'none' && cell.mediaUrl);
+            if (hasContent) {
                 cellDiv.classList.add('has-content');
+            }
+            
+            // Determine what to show as preview
+            let previewContent = '';
+            if (cell.question) {
+                previewContent = truncateText(cell.question, 50);
+            } else if (cell.answer) {
+                previewContent = `A: ${truncateText(cell.answer, 40)}`;
+            } else if (cell.mediaType && cell.mediaType !== 'none' && cell.mediaUrl) {
+                previewContent = `📎 ${cell.mediaType.toUpperCase()}`;
             }
             
             cellDiv.innerHTML = `
                 <div class="cell-value">$${cell.value}</div>
                 ${isDailyDouble ? '<div class="dd-indicator">DD</div>' : ''}
-                ${cell.question ? '<div class="cell-preview">' + truncateText(cell.question, 50) + '</div>' : ''}
+                ${hasContent ? '<div class="content-indicator">●</div>' : ''}
+                ${previewContent ? '<div class="cell-preview">' + previewContent + '</div>' : ''}
             `;
             cellDiv.onclick = () => openCellEditor(cellIndex);
             questionsGrid.appendChild(cellDiv);
@@ -213,8 +226,14 @@ function loadFromURL() {
 
 function shareEditor() {
     const url = window.location.href;
+    const button = document.querySelector('button[onclick="shareEditor()"]');
+    const originalText = button.textContent;
+    
     navigator.clipboard.writeText(url).then(() => {
-        alert('Editor URL copied to clipboard!');
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+            button.textContent = originalText;
+        }, 2000);
     }).catch(() => {
         prompt('Copy this URL:', url);
     });
@@ -224,8 +243,14 @@ function sharePlayer() {
     const hash = window.location.hash;
     const baseURL = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
     const playerURL = baseURL + '/player.html' + hash;
+    const button = document.querySelector('button[onclick="sharePlayer()"]');
+    const originalText = button.textContent;
+    
     navigator.clipboard.writeText(playerURL).then(() => {
-        alert('Player URL copied to clipboard!');
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+            button.textContent = originalText;
+        }, 2000);
     }).catch(() => {
         prompt('Copy this URL:', playerURL);
     });

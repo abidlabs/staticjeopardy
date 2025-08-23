@@ -280,6 +280,8 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .category-cell input {
@@ -291,6 +293,9 @@ header h1 {
     font-weight: bold;
     text-transform: uppercase;
     width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .category-cell input::placeholder {
@@ -357,6 +362,16 @@ header h1 {
     font-size: 0.4em;
 }
 
+.content-indicator {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    color: #ffcc00;
+    font-size: 1em;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
 .game-cell.used {
     background: #333;
     cursor: default;
@@ -388,7 +403,7 @@ header h1 {
 
 .game-board {
     padding: 20px;
-    padding-bottom: 120px; /* Space for sticky teams section */
+    padding-bottom: 80px; /* Space for sticky teams section */
     max-width: 1400px;
     margin: 0 auto;
     flex: 1;
@@ -405,15 +420,15 @@ header h1 {
     background: white;
     border-top: 2px solid #e0e0e0;
     box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
-    padding: 10px 30px;
+    padding: 8px 30px;
     z-index: 100;
 }
 
-.teams-header {
+.teams-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
+    justify-content: center;
+    gap: 30px;
 }
 
 .teams-container {
@@ -421,6 +436,10 @@ header h1 {
     gap: 20px;
     overflow-x: auto;
     justify-content: center;
+}
+
+.add-team-btn {
+    flex-shrink: 0;
 }
 
 .team-card {
@@ -438,6 +457,14 @@ header h1 {
     font-weight: bold;
     margin-bottom: 2px;
     color: #333;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.team-name:hover {
+    background-color: #e0e0e0;
 }
 
 .team-score {

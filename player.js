@@ -30,6 +30,12 @@ function loadFromURL() {
 }
 
 function initializeGame() {
+    // Check if URL contains team data (backwards compatible)
+    let urlTeams = null;
+    if (gameData.playerState && gameData.playerState.teams) {
+        urlTeams = gameData.playerState.teams;
+    }
+    
     // Load saved game state from localStorage
     const gameId = window.location.hash;
     const savedState = localStorage.getItem('gameState_' + gameId);
@@ -37,6 +43,10 @@ function initializeGame() {
         const state = JSON.parse(savedState);
         teams = state.teams || [];
         usedCells = state.usedCells || [];
+    } else if (urlTeams) {
+        // Use team names from URL if available
+        teams = urlTeams.map(team => ({ name: team.name, score: team.score || 0 }));
+        usedCells = [];
     } else {
         // Initialize with 3 default teams if no saved state
         teams = [
@@ -44,6 +54,7 @@ function initializeGame() {
             { name: 'Team 2', score: 0 },
             { name: 'Team 3', score: 0 }
         ];
+        usedCells = [];
     }
     
     // Set title
@@ -152,7 +163,7 @@ function showQuestion(cell, value, isDailyDouble = false) {
         `Daily Double - $${value}` : `$${value}`;
     
     // Display question
-    questionContent.textContent = cell.question || 'No question provided';
+    questionContent.textContent = cell.question || '';
     
     // Handle media
     mediaContainer.innerHTML = '';
@@ -181,7 +192,7 @@ function showAnswer() {
     const showAnswerBtn = document.getElementById('showAnswerBtn');
     const teamButtons = document.getElementById('teamButtons');
     
-    answerContent.textContent = `Answer: ${cell.answer || 'No answer provided'}`;
+    answerContent.textContent = cell.answer ? `Answer: ${cell.answer}` : '';
     answerContent.style.display = 'block';
     showAnswerBtn.style.display = 'none';
     
@@ -250,7 +261,7 @@ function renderTeams() {
         const teamDiv = document.createElement('div');
         teamDiv.className = 'team-card';
         teamDiv.innerHTML = `
-            <div class="team-name">${team.name}</div>
+            <div class="team-name" onclick="editTeamName(${index})" title="Click to edit">${team.name}</div>
             <div class="team-score">$${team.score}</div>
         `;
         container.appendChild(teamDiv);
@@ -271,12 +282,23 @@ function saveTeam() {
         });
         saveGameState();
         renderTeams();
+        updateURLWithTeams();
         closeTeamModal();
     }
 }
 
 function closeTeamModal() {
     document.getElementById('teamModal').style.display = 'none';
+}
+
+function editTeamName(teamIndex) {
+    const newName = prompt('Enter new team name:', teams[teamIndex].name);
+    if (newName && newName.trim()) {
+        teams[teamIndex].name = newName.trim();
+        saveGameState();
+        renderTeams();
+        updateURLWithTeams();
+    }
 }
 
 
@@ -288,6 +310,38 @@ function saveGameState() {
         usedCells: usedCells
     };
     localStorage.setItem('gameState_' + gameId, JSON.stringify(state));
+}
+
+function updateURLWithTeams() {
+    // Get the original game data from URL
+    const hash = window.location.hash.substring(1);
+    if (!hash) return;
+    
+    try {
+        const decompressed = LZString.decompressFromEncodedURIComponent(hash);
+        if (decompressed) {
+            const originalData = JSON.parse(decompressed);
+            
+            // Add team names to the data (backwards compatible)
+            const extendedData = {
+                ...originalData,
+                playerState: {
+                    teams: teams.filter(team => team.name !== 'Team 1' && team.name !== 'Team 2' && team.name !== 'Team 3').length > 0 
+                        ? teams.map(team => ({ name: team.name, score: team.score }))
+                        : undefined
+                }
+            };
+            
+            // Only update URL if we have custom team names
+            if (extendedData.playerState && extendedData.playerState.teams) {
+                const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(extendedData));
+                const newURL = window.location.pathname + '#' + compressed;
+                window.history.replaceState(null, '', newURL);
+            }
+        }
+    } catch (e) {
+        console.error('Failed to update URL with teams:', e);
+    }
 }
 
 function resetGame() {
@@ -303,8 +357,14 @@ function resetGame() {
 // Navigation
 function shareGame() {
     const url = window.location.href;
+    const button = document.querySelector('button[onclick="shareGame()"]');
+    const originalText = button.textContent;
+    
     navigator.clipboard.writeText(url).then(() => {
-        alert('Game URL copied to clipboard!');
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+            button.textContent = originalText;
+        }, 2000);
     }).catch(() => {
         prompt('Copy this URL:', url);
     });
