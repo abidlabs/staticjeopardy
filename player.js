@@ -252,11 +252,6 @@ function renderTeams() {
         teamDiv.innerHTML = `
             <div class="team-name">${team.name}</div>
             <div class="team-score">$${team.score}</div>
-            <div class="team-actions">
-                <button onclick="adjustScore(${index}, 100)" class="btn-adjust">+100</button>
-                <button onclick="adjustScore(${index}, -100)" class="btn-adjust">-100</button>
-                <button onclick="removeTeam(${index})" class="btn-remove">✕</button>
-            </div>
         `;
         container.appendChild(teamDiv);
     });
@@ -284,19 +279,6 @@ function closeTeamModal() {
     document.getElementById('teamModal').style.display = 'none';
 }
 
-function removeTeam(index) {
-    if (confirm(`Remove team "${teams[index].name}"?`)) {
-        teams.splice(index, 1);
-        saveGameState();
-        renderTeams();
-    }
-}
-
-function adjustScore(teamIndex, amount) {
-    teams[teamIndex].score += amount;
-    saveGameState();
-    renderTeams();
-}
 
 // Game State Management
 function saveGameState() {
