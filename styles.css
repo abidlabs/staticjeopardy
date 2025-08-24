@@ -194,7 +194,22 @@ header h1 {
 .header-left {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 10px;
+}
+
+.btn-splash {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-splash:hover {
+    background: rgba(255,255,255,0.3);
 }
 
 .back-link {
@@ -467,10 +482,67 @@ header h1 {
     background-color: #e0e0e0;
 }
 
+.team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.team-score-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
 .team-score {
     font-size: 1.3em;
     color: #667eea;
     font-weight: bold;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.team-score:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+.btn-adjust-subtle {
+    background: transparent;
+    border: 1px solid #d0d0d0;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 1.2em;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-adjust-subtle:hover {
+    background: #f0f0f0;
+    border-color: #999;
+}
+
+.btn-remove-subtle {
+    background: transparent;
+    color: #999;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 0 4px;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.btn-remove-subtle:hover {
+    opacity: 1;
 }
 
 .team-actions {
@@ -607,7 +679,7 @@ header h1 {
 
 /* Question Modal Specific */
 .question-content {
-    font-size: 1.5em;
+    font-size: 2.5em;
     margin-bottom: 20px;
     text-align: center;
     color: #333;
@@ -643,6 +715,15 @@ header h1 {
 
 .team-buttons {
     margin-top: 20px;
+}
+
+.scoring-instruction {
+    text-align: center;
+    font-style: italic;
+    color: #666;
+    padding: 10px;
+    background: #f0f9ff;
+    border-radius: 8px;
 }
 
 .scoring-label {
@@ -685,6 +766,157 @@ header h1 {
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     font-size: 1.1em;
+}
+
+/* Splash Screen */
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, #060ce9 0%, #4040ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    cursor: pointer;
+}
+
+.splash-content {
+    text-align: center;
+    padding: 40px;
+}
+
+.splash-content h1 {
+    color: #ffcc00;
+    font-size: 6em;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+    animation: pulseTitle 2s ease-in-out infinite;
+}
+
+@keyframes pulseTitle {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Final Jeopardy Styles */
+.final-jeopardy-editor {
+    background: #f8f9fa;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.final-jeopardy-editor h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.final-jeopardy-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.form-row label {
+    min-width: 100px;
+    font-weight: 600;
+    padding-top: 8px;
+}
+
+.form-row input,
+.form-row textarea {
+    flex: 1;
+    padding: 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+.form-row input[type="number"] {
+    max-width: 100px;
+}
+
+.final-jeopardy-modal {
+    max-width: 800px;
+}
+
+.fj-view {
+    text-align: center;
+    padding: 20px;
+}
+
+.fj-category-display,
+.fj-question-display,
+.fj-answer-display {
+    margin-bottom: 30px;
+}
+
+.fj-label {
+    font-size: 1.5em;
+    color: #667eea;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.fj-category-text {
+    font-size: 3em;
+    font-weight: bold;
+    color: #060ce9;
+    text-transform: uppercase;
+    margin: 20px 0;
+}
+
+.fj-question-text {
+    font-size: 2em;
+    color: #333;
+    line-height: 1.4;
+    margin: 20px 0;
+}
+
+.fj-answer-text {
+    font-size: 2em;
+    color: #0066cc;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.fj-timer {
+    font-size: 4em;
+    font-weight: bold;
+    color: #ffcc00;
+    margin: 20px 0;
+    font-family: monospace;
+}
+
+.question-timer {
+    font-size: 2em;
+    font-weight: bold;
+    color: #ffcc00;
+    text-align: center;
+    margin: 20px 0;
+    font-family: monospace;
+}
+
+.fj-scoring-note {
+    font-style: italic;
+    color: #666;
+    margin-top: 20px;
+}
+
+.btn-large {
+    padding: 20px 40px;
+    font-size: 1.3em;
 }
 
 /* Responsive Design */

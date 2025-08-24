@@ -5,7 +5,14 @@ let gameData = {
     settings: {
         numCategories: 5,
         numQuestions: 5,
-        dailyDoubles: []
+        dailyDoubles: [],
+        questionTimerSeconds: 0
+    },
+    finalJeopardy: {
+        category: "",
+        question: "",
+        answer: "",
+        timerSeconds: 30
     }
 };
 
@@ -15,16 +22,18 @@ let currentEditingCell = null;
 window.addEventListener('DOMContentLoaded', () => {
     loadFromURL();
     initializeBoard();
+    loadFinalJeopardy();
 });
 
 function initializeBoard() {
     const numCats = gameData.settings.numCategories;
     const numQs = gameData.settings.numQuestions;
     
-    // Set dropdowns
+    // Set dropdowns and inputs
     document.getElementById('numCategories').value = numCats;
     document.getElementById('numQuestions').value = numQs;
     document.getElementById('gameTitle').value = gameData.title;
+    document.getElementById('questionTimer').value = gameData.settings.questionTimerSeconds || 0;
     
     // Initialize categories if needed
     if (gameData.categories.length !== numCats) {
@@ -135,6 +144,11 @@ function updateBoardSize() {
     gameData.settings.numQuestions = parseInt(document.getElementById('numQuestions').value);
     gameData.settings.dailyDoubles = []; // Reset daily doubles
     initializeBoard();
+    saveToURL();
+}
+
+function updateQuestionTimer() {
+    gameData.settings.questionTimerSeconds = parseInt(document.getElementById('questionTimer').value) || 0;
     saveToURL();
 }
 
@@ -261,5 +275,33 @@ window.addEventListener('popstate', (event) => {
     if (event.state) {
         gameData = event.state;
         initializeBoard();
+        loadFinalJeopardy();
     }
 });
+
+// Final Jeopardy functions
+function loadFinalJeopardy() {
+    if (!gameData.finalJeopardy) {
+        gameData.finalJeopardy = {
+            category: "",
+            question: "",
+            answer: "",
+            timerSeconds: 30
+        };
+    }
+    
+    document.getElementById('fjCategory').value = gameData.finalJeopardy.category || '';
+    document.getElementById('fjQuestion').value = gameData.finalJeopardy.question || '';
+    document.getElementById('fjAnswer').value = gameData.finalJeopardy.answer || '';
+    document.getElementById('fjTimer').value = gameData.finalJeopardy.timerSeconds || 30;
+}
+
+function updateFinalJeopardy() {
+    gameData.finalJeopardy = {
+        category: document.getElementById('fjCategory').value,
+        question: document.getElementById('fjQuestion').value,
+        answer: document.getElementById('fjAnswer').value,
+        timerSeconds: parseInt(document.getElementById('fjTimer').value) || 30
+    };
+    saveToURL();
+}

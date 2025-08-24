@@ -8,12 +8,21 @@
     <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 </head>
 <body>
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="splash-screen" onclick="hideSplashScreen()" style="display:none;">
+        <div class="splash-content">
+            <h1 id="splashTitle"></h1>
+        </div>
+    </div>
+    
     <div class="player-container">
         <header class="player-header">
             <div class="header-left">
                 <h1 id="gameTitle">Static Jeopardy</h1>
+                <button onclick="toggleFullscreen()" class="btn-splash" title="Toggle fullscreen">⛶</button>
             </div>
             <div class="header-right">
+                <button onclick="showFinalJeopardy()" class="btn btn-primary" id="finalJeopardyBtn">Final Jeopardy</button>
                 <button onclick="shareGame()" class="btn btn-secondary">🔗 Share</button>
                 <button onclick="resetGame()" class="btn btn-warning">🔄 Reset</button>
             </div>
@@ -51,6 +60,7 @@
                         <!-- Question content will be displayed here -->
                     </div>
                     <div id="mediaContainer" class="media-container"></div>
+                    <div id="questionTimerDisplay" class="question-timer" style="display:none;">30</div>
                     <button onclick="showAnswer()" id="showAnswerBtn" class="btn btn-primary">Show Answer</button>
                     <div id="answerContent" class="answer-content" style="display:none;">
                         <!-- Answer will be displayed here -->
@@ -76,6 +86,41 @@
                     <input type="number" id="wagerAmount" placeholder="Enter wager amount" min="0">
                     <div class="modal-actions">
                         <button onclick="submitWager()" class="btn btn-primary">Submit Wager</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Jeopardy Modal -->
+        <div id="finalJeopardyModal" class="modal">
+            <div class="modal-content final-jeopardy-modal">
+                <div class="modal-header">
+                    <h2>FINAL JEOPARDY</h2>
+                    <span class="close" onclick="closeFinalJeopardy()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="fjCategoryView" class="fj-view">
+                        <div class="fj-category-display">
+                            <div class="fj-label">CATEGORY:</div>
+                            <div id="fjCategoryText" class="fj-category-text"></div>
+                        </div>
+                        <button onclick="showFinalQuestion()" class="btn btn-primary btn-large">Show Question</button>
+                    </div>
+                    
+                    <div id="fjQuestionView" class="fj-view" style="display:none;">
+                        <div class="fj-question-display">
+                            <div id="fjQuestionText" class="fj-question-text"></div>
+                        </div>
+                        <div class="fj-timer" id="fjTimer">30</div>
+                        <button onclick="showFinalAnswer()" class="btn btn-primary">Show Answer</button>
+                    </div>
+                    
+                    <div id="fjAnswerView" class="fj-view" style="display:none;">
+                        <div class="fj-answer-display">
+                            <div class="fj-label">ANSWER:</div>
+                            <div id="fjAnswerText" class="fj-answer-text"></div>
+                        </div>
+                        <div class="fj-scoring-note">Use +/- buttons to award points to teams</div>
                     </div>
                 </div>
             </div>

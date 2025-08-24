@@ -3,6 +3,11 @@ let teams = [];
 let usedCells = [];
 let currentQuestion = null;
 let currentWager = 0;
+let lastQuestionValue = 200; // Default point value for +/- buttons
+let finalJeopardyTimer = null;
+let finalJeopardySeconds = 30;
+let questionTimer = null;
+let questionSeconds = 0;
 
 // Initialize player
 window.addEventListener('DOMContentLoaded', () => {
@@ -62,6 +67,9 @@ function initializeGame() {
     
     renderBoard();
     renderTeams();
+    
+    // Show splash screen automatically when game loads
+    showSplashScreen();
 }
 
 function renderBoard() {
@@ -112,6 +120,10 @@ function selectQuestion(cellIndex) {
     const cell = gameData.cells[cellIndex];
     const isDailyDouble = gameData.settings.dailyDoubles.includes(cellIndex);
     
+    // Update last question value for +/- buttons
+    lastQuestionValue = cell.value;
+    renderTeams(); // Re-render to update button values
+    
     if (isDailyDouble && teams.length > 0) {
         showDailyDouble(cell);
     } else {
@@ -158,6 +170,7 @@ function showQuestion(cell, value, isDailyDouble = false) {
     const answerContent = document.getElementById('answerContent');
     const showAnswerBtn = document.getElementById('showAnswerBtn');
     const teamButtons = document.getElementById('teamButtons');
+    const questionTimerDisplay = document.getElementById('questionTimerDisplay');
     
     document.getElementById('questionValue').textContent = isDailyDouble ? 
         `Daily Double - $${value}` : `$${value}`;
@@ -183,6 +196,27 @@ function showQuestion(cell, value, isDailyDouble = false) {
     showAnswerBtn.style.display = 'block';
     teamButtons.style.display = 'none';
     
+    // Handle question timer
+    const timerSeconds = gameData.settings && gameData.settings.questionTimerSeconds ? gameData.settings.questionTimerSeconds : 0;
+    if (timerSeconds > 0) {
+        questionSeconds = timerSeconds;
+        questionTimerDisplay.textContent = questionSeconds;
+        questionTimerDisplay.style.display = 'block';
+        
+        questionTimer = setInterval(() => {
+            questionSeconds--;
+            questionTimerDisplay.textContent = questionSeconds;
+            
+            if (questionSeconds <= 0) {
+                clearInterval(questionTimer);
+                questionTimer = null;
+                questionTimerDisplay.textContent = 'TIME!';
+            }
+        }, 1000);
+    } else {
+        questionTimerDisplay.style.display = 'none';
+    }
+    
     modal.style.display = 'block';
 }
 
@@ -196,41 +230,8 @@ function showAnswer() {
     answerContent.style.display = 'block';
     showAnswerBtn.style.display = 'none';
     
-    // Show team scoring buttons
-    if (teams.length > 0) {
-        const value = currentWager || gameData.cells[currentQuestion].value;
-        teamButtons.innerHTML = '<div class="scoring-label">Award points to:</div>';
-        
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.className = 'scoring-buttons';
-        
-        teams.forEach((team, index) => {
-            const correctBtn = document.createElement('button');
-            correctBtn.className = 'btn btn-success';
-            correctBtn.textContent = `${team.name} ✓`;
-            correctBtn.onclick = () => scoreQuestion(index, value);
-            
-            const incorrectBtn = document.createElement('button');
-            incorrectBtn.className = 'btn btn-danger';
-            incorrectBtn.textContent = `${team.name} ✗`;
-            incorrectBtn.onclick = () => scoreQuestion(index, -value);
-            
-            const teamDiv = document.createElement('div');
-            teamDiv.className = 'team-scoring';
-            teamDiv.appendChild(correctBtn);
-            teamDiv.appendChild(incorrectBtn);
-            buttonsContainer.appendChild(teamDiv);
-        });
-        
-        const noScoreBtn = document.createElement('button');
-        noScoreBtn.className = 'btn btn-secondary';
-        noScoreBtn.textContent = 'No Score';
-        noScoreBtn.onclick = () => scoreQuestion(null, 0);
-        
-        teamButtons.appendChild(buttonsContainer);
-        teamButtons.appendChild(noScoreBtn);
-        teamButtons.style.display = 'block';
-    }
+    teamButtons.innerHTML = '';
+    teamButtons.style.display = 'none';
 }
 
 function scoreQuestion(teamIndex, points) {
@@ -250,6 +251,12 @@ function scoreQuestion(teamIndex, points) {
 
 function closeQuestionModal() {
     document.getElementById('questionModal').style.display = 'none';
+    
+    // Clear question timer if running
+    if (questionTimer) {
+        clearInterval(questionTimer);
+        questionTimer = null;
+    }
 }
 
 // Team Management
@@ -261,8 +268,15 @@ function renderTeams() {
         const teamDiv = document.createElement('div');
         teamDiv.className = 'team-card';
         teamDiv.innerHTML = `
-            <div class="team-name" onclick="editTeamName(${index})" title="Click to edit">${team.name}</div>
-            <div class="team-score">$${team.score}</div>
+            <div class="team-header">
+                <div class="team-name" onclick="editTeamName(${index})" title="Click to edit">${team.name}</div>
+                <button onclick="removeTeam(${index})" class="btn-remove-subtle" title="Remove team">×</button>
+            </div>
+            <div class="team-score-row">
+                <button onclick="adjustTeamScore(${index}, -lastQuestionValue)" class="btn-adjust-subtle" title="Subtract ${lastQuestionValue}">−</button>
+                <div class="team-score" onclick="editTeamScore(${index})" title="Click to edit">$${team.score}</div>
+                <button onclick="adjustTeamScore(${index}, lastQuestionValue)" class="btn-adjust-subtle" title="Add ${lastQuestionValue}">+</button>
+            </div>
         `;
         container.appendChild(teamDiv);
     });
@@ -295,6 +309,32 @@ function editTeamName(teamIndex) {
     const newName = prompt('Enter new team name:', teams[teamIndex].name);
     if (newName && newName.trim()) {
         teams[teamIndex].name = newName.trim();
+        saveGameState();
+        renderTeams();
+        updateURLWithTeams();
+    }
+}
+
+function editTeamScore(teamIndex) {
+    const currentScore = teams[teamIndex].score;
+    const newScore = prompt('Enter new score:', currentScore);
+    if (newScore !== null) {
+        const parsedScore = parseInt(newScore) || 0;
+        teams[teamIndex].score = parsedScore;
+        saveGameState();
+        renderTeams();
+    }
+}
+
+function adjustTeamScore(teamIndex, amount) {
+    teams[teamIndex].score += amount;
+    saveGameState();
+    renderTeams();
+}
+
+function removeTeam(teamIndex) {
+    if (confirm(`Remove team "${teams[teamIndex].name}"?`)) {
+        teams.splice(teamIndex, 1);
         saveGameState();
         renderTeams();
         updateURLWithTeams();
@@ -346,11 +386,16 @@ function updateURLWithTeams() {
 
 function resetGame() {
     if (confirm('Are you sure you want to reset the game? This will clear all scores and progress.')) {
-        teams = [];
+        teams = [
+            { name: 'Team 1', score: 0 },
+            { name: 'Team 2', score: 0 },
+            { name: 'Team 3', score: 0 }
+        ];
         usedCells = [];
         saveGameState();
         renderBoard();
         renderTeams();
+        updateURLWithTeams();
     }
 }
 
@@ -374,5 +419,105 @@ function shareGame() {
 window.onclick = function(event) {
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
+    }
+}
+
+// Splash Screen functions
+function showSplashScreen() {
+    const title = gameData.title || 'Jeopardy Game';
+    document.getElementById('splashTitle').textContent = title;
+    document.getElementById('splashScreen').style.display = 'flex';
+    
+    // Add keyboard listener to hide splash screen
+    document.addEventListener('keydown', hideSplashScreenOnce);
+}
+
+function hideSplashScreen() {
+    document.getElementById('splashScreen').style.display = 'none';
+    // Remove the keyboard listener
+    document.removeEventListener('keydown', hideSplashScreenOnce);
+}
+
+function hideSplashScreenOnce() {
+    hideSplashScreen();
+}
+
+// Fullscreen toggle functionality
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        // Enter fullscreen
+        document.documentElement.requestFullscreen().then(() => {
+            // Show splash screen in fullscreen
+            showSplashScreen();
+        }).catch(err => {
+            console.log('Error attempting to enable full-screen:', err);
+            // Just show splash screen without fullscreen
+            showSplashScreen();
+        });
+    } else {
+        // Exit fullscreen
+        document.exitFullscreen();
+    }
+}
+
+// Final Jeopardy functions
+function showFinalJeopardy() {
+    if (!gameData.finalJeopardy || !gameData.finalJeopardy.category) {
+        alert('No Final Jeopardy configured for this game.');
+        return;
+    }
+    
+    // Reset views
+    document.getElementById('fjCategoryView').style.display = 'block';
+    document.getElementById('fjQuestionView').style.display = 'none';
+    document.getElementById('fjAnswerView').style.display = 'none';
+    
+    // Set content
+    document.getElementById('fjCategoryText').textContent = gameData.finalJeopardy.category;
+    document.getElementById('fjQuestionText').textContent = gameData.finalJeopardy.question || '';
+    document.getElementById('fjAnswerText').textContent = gameData.finalJeopardy.answer || '';
+    
+    // Set timer duration
+    finalJeopardySeconds = gameData.finalJeopardy.timerSeconds || 30;
+    
+    // Show modal
+    document.getElementById('finalJeopardyModal').style.display = 'block';
+}
+
+function closeFinalJeopardy() {
+    document.getElementById('finalJeopardyModal').style.display = 'none';
+    if (finalJeopardyTimer) {
+        clearInterval(finalJeopardyTimer);
+        finalJeopardyTimer = null;
+    }
+}
+
+function showFinalQuestion() {
+    document.getElementById('fjCategoryView').style.display = 'none';
+    document.getElementById('fjQuestionView').style.display = 'block';
+    
+    // Start timer
+    let seconds = finalJeopardySeconds;
+    document.getElementById('fjTimer').textContent = seconds;
+    
+    finalJeopardyTimer = setInterval(() => {
+        seconds--;
+        document.getElementById('fjTimer').textContent = seconds;
+        
+        if (seconds <= 0) {
+            clearInterval(finalJeopardyTimer);
+            finalJeopardyTimer = null;
+            document.getElementById('fjTimer').textContent = 'TIME!';
+        }
+    }, 1000);
+}
+
+function showFinalAnswer() {
+    document.getElementById('fjQuestionView').style.display = 'none';
+    document.getElementById('fjAnswerView').style.display = 'block';
+    
+    if (finalJeopardyTimer) {
+        clearInterval(finalJeopardyTimer);
+        finalJeopardyTimer = null;
     }
 }

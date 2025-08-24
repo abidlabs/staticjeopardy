@@ -37,6 +37,12 @@
                         <option value="6">6 Questions</option>
                     </select>
                 </div>
+                
+                <div class="board-size">
+                    <label>Question Timer:</label>
+                    <input type="number" id="questionTimer" min="0" max="300" placeholder="0 = No timer" onchange="updateQuestionTimer()" style="width: 100px; padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px;">
+                    <span style="font-size: 0.9em; color: #666;">seconds</span>
+                </div>
             </div>
 
             <div class="board-editor">
@@ -45,6 +51,29 @@
                 </div>
                 <div class="questions-grid" id="questionsGrid">
                     <!-- Question cells will be generated here -->
+                </div>
+            </div>
+            
+            <!-- Final Jeopardy Section -->
+            <div class="final-jeopardy-editor">
+                <h3>Final Jeopardy</h3>
+                <div class="final-jeopardy-form">
+                    <div class="form-row">
+                        <label>Category:</label>
+                        <input type="text" id="fjCategory" placeholder="Enter Final Jeopardy category" oninput="updateFinalJeopardy()">
+                    </div>
+                    <div class="form-row">
+                        <label>Question:</label>
+                        <textarea id="fjQuestion" rows="3" placeholder="Enter Final Jeopardy question" oninput="updateFinalJeopardy()"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label>Answer:</label>
+                        <textarea id="fjAnswer" rows="2" placeholder="Enter Final Jeopardy answer" oninput="updateFinalJeopardy()"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label>Timer (seconds):</label>
+                        <input type="number" id="fjTimer" min="10" max="120" value="30" oninput="updateFinalJeopardy()">
+                    </div>
                 </div>
             </div>
         </div>
