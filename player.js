@@ -12,7 +12,7 @@ let questionSeconds = 0;
 // Initialize player
 window.addEventListener('DOMContentLoaded', () => {
     loadFromURL();
-    if (gameData) {
+    if (gameData && gameData.settings && Array.isArray(gameData.cells)) {
         initializeGame();
     } else {
         alert('No game data found. Please use a valid game URL.');
@@ -32,6 +32,12 @@ function loadFromURL() {
             console.error('Failed to load game data from URL:', e);
         }
     }
+}
+
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
 function initializeGame() {
@@ -150,20 +156,36 @@ function showDailyDouble(cell) {
 function submitWager() {
     const teamIndex = parseInt(document.getElementById('ddTeamSelect').value);
     const wager = parseInt(document.getElementById('wagerAmount').value) || 0;
-    
+
     if (wager <= 0) {
         alert('Please enter a valid wager amount');
         return;
     }
-    
+
+    // "True Daily Double" rule: max wager is the team's score, or the highest
+    // clue value on the board if their score is lower
+    const maxBoardValue = Math.max(...gameData.cells.map(c => c.value || 0));
+    const maxWager = Math.max(teams[teamIndex] ? teams[teamIndex].score : 0, maxBoardValue);
+    if (wager > maxWager) {
+        alert(`Maximum wager is $${maxWager}`);
+        return;
+    }
+
     currentWager = wager;
+    lastQuestionValue = wager; // Keep the +/- scoreboard buttons in sync with the wager
     document.getElementById('dailyDoubleModal').style.display = 'none';
-    
+
     const cell = gameData.cells[currentQuestion];
     showQuestion(cell, wager, true);
 }
 
 function showQuestion(cell, value, isDailyDouble = false) {
+    // Clear any timer left over from a previously opened question
+    if (questionTimer) {
+        clearInterval(questionTimer);
+        questionTimer = null;
+    }
+
     const modal = document.getElementById('questionModal');
     const questionContent = document.getElementById('questionContent');
     const mediaContainer = document.getElementById('mediaContainer');
@@ -178,15 +200,23 @@ function showQuestion(cell, value, isDailyDouble = false) {
     // Display question
     questionContent.textContent = cell.question || '';
     
-    // Handle media
+    // Handle media (built via DOM so URLs with quotes/special chars can't break the markup)
     mediaContainer.innerHTML = '';
     if (cell.mediaType && cell.mediaType !== 'none' && cell.mediaUrl) {
+        let mediaEl = null;
         if (cell.mediaType === 'image') {
-            mediaContainer.innerHTML = `<img src="${cell.mediaUrl}" alt="Question media">`;
+            mediaEl = document.createElement('img');
+            mediaEl.alt = 'Question media';
         } else if (cell.mediaType === 'video') {
-            mediaContainer.innerHTML = `<video controls src="${cell.mediaUrl}"></video>`;
+            mediaEl = document.createElement('video');
+            mediaEl.controls = true;
         } else if (cell.mediaType === 'audio') {
-            mediaContainer.innerHTML = `<audio controls src="${cell.mediaUrl}"></audio>`;
+            mediaEl = document.createElement('audio');
+            mediaEl.controls = true;
+        }
+        if (mediaEl) {
+            mediaEl.src = cell.mediaUrl;
+            mediaContainer.appendChild(mediaEl);
         }
     }
     
@@ -225,33 +255,100 @@ function showAnswer() {
     const answerContent = document.getElementById('answerContent');
     const showAnswerBtn = document.getElementById('showAnswerBtn');
     const teamButtons = document.getElementById('teamButtons');
-    
+
     answerContent.textContent = cell.answer ? `Answer: ${cell.answer}` : '';
     answerContent.style.display = 'block';
     showAnswerBtn.style.display = 'none';
-    
+
+    // Stop the countdown once the answer is revealed
+    if (questionTimer) {
+        clearInterval(questionTimer);
+        questionTimer = null;
+    }
+
+    // Render scoring buttons: ✓ awards points and closes, ✗ deducts and
+    // leaves the clue open so another team can answer
+    const points = currentWager > 0 ? currentWager : cell.value;
     teamButtons.innerHTML = '';
-    teamButtons.style.display = 'none';
+
+    const hint = document.createElement('div');
+    hint.className = 'scoring-hint';
+    hint.textContent = `✓ awards $${points} and closes the clue · ✗ deducts $${points}`;
+    teamButtons.appendChild(hint);
+
+    const buttonsRow = document.createElement('div');
+    buttonsRow.className = 'scoring-buttons';
+    teams.forEach((team, index) => {
+        const group = document.createElement('div');
+        group.className = 'team-scoring';
+
+        const name = document.createElement('span');
+        name.className = 'team-scoring-name';
+        name.textContent = team.name;
+
+        const correct = document.createElement('button');
+        correct.className = 'btn-correct';
+        correct.textContent = '✓';
+        correct.title = `${team.name} answered correctly (+$${points})`;
+        correct.onclick = () => scoreQuestion(index, points);
+
+        const incorrect = document.createElement('button');
+        incorrect.className = 'btn-incorrect';
+        incorrect.textContent = '✗';
+        incorrect.title = `${team.name} answered incorrectly (-$${points})`;
+        incorrect.onclick = () => markIncorrect(index, points);
+
+        group.appendChild(name);
+        group.appendChild(correct);
+        group.appendChild(incorrect);
+        buttonsRow.appendChild(group);
+    });
+    teamButtons.appendChild(buttonsRow);
+
+    const noAnswer = document.createElement('button');
+    noAnswer.className = 'btn btn-secondary btn-small';
+    noAnswer.textContent = 'No correct answer — close clue';
+    noAnswer.onclick = () => scoreQuestion(null, 0);
+    teamButtons.appendChild(noAnswer);
+
+    teamButtons.style.display = 'block';
+}
+
+function markIncorrect(teamIndex, points) {
+    teams[teamIndex].score -= points;
+    saveGameState();
+    renderTeams();
+}
+
+function finishCurrentQuestion() {
+    if (currentQuestion !== null && !usedCells.includes(currentQuestion)) {
+        usedCells.push(currentQuestion);
+    }
+    currentQuestion = null;
+    currentWager = 0;
+    saveGameState();
+    renderBoard();
 }
 
 function scoreQuestion(teamIndex, points) {
     if (teamIndex !== null) {
         teams[teamIndex].score += points;
     }
-    
-    usedCells.push(currentQuestion);
-    currentQuestion = null;
-    currentWager = 0;
-    
-    saveGameState();
-    renderBoard();
+
+    finishCurrentQuestion();
     renderTeams();
     closeQuestionModal();
 }
 
 function closeQuestionModal() {
+    // If the answer was already revealed, closing the modal retires the clue
+    const answerShown = document.getElementById('answerContent').style.display !== 'none';
+    if (answerShown && currentQuestion !== null) {
+        finishCurrentQuestion();
+    }
+
     document.getElementById('questionModal').style.display = 'none';
-    
+
     // Clear question timer if running
     if (questionTimer) {
         clearInterval(questionTimer);
@@ -267,14 +364,15 @@ function renderTeams() {
     teams.forEach((team, index) => {
         const teamDiv = document.createElement('div');
         teamDiv.className = 'team-card';
+        const scoreClass = team.score < 0 ? 'team-score negative' : 'team-score';
         teamDiv.innerHTML = `
             <div class="team-header">
-                <div class="team-name" onclick="editTeamName(${index})" title="Click to edit">${team.name}</div>
+                <div class="team-name" onclick="editTeamName(${index})" title="Click to edit">${escapeHTML(team.name)}</div>
                 <button onclick="removeTeam(${index})" class="btn-remove-subtle" title="Remove team">×</button>
             </div>
             <div class="team-score-row">
                 <button onclick="adjustTeamScore(${index}, -lastQuestionValue)" class="btn-adjust-subtle" title="Subtract ${lastQuestionValue}">−</button>
-                <div class="team-score" onclick="editTeamScore(${index})" title="Click to edit">$${team.score}</div>
+                <div class="${scoreClass}" onclick="editTeamScore(${index})" title="Click to edit">${team.score < 0 ? '-$' + Math.abs(team.score) : '$' + team.score}</div>
                 <button onclick="adjustTeamScore(${index}, lastQuestionValue)" class="btn-adjust-subtle" title="Add ${lastQuestionValue}">+</button>
             </div>
         `;
@@ -415,10 +513,17 @@ function shareGame() {
     });
 }
 
-// Modal close on outside click
+// Modal close on outside click — route through the proper close handlers so
+// timers get cleared and answered clues get retired
 window.onclick = function(event) {
     if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
+        if (event.target.id === 'questionModal') {
+            closeQuestionModal();
+        } else if (event.target.id === 'finalJeopardyModal') {
+            closeFinalJeopardy();
+        } else {
+            event.target.style.display = 'none';
+        }
     }
 }
 

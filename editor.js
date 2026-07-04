@@ -72,13 +72,13 @@ function renderBoard() {
     for (let i = 0; i < numCats; i++) {
         const catDiv = document.createElement('div');
         catDiv.className = 'category-cell';
-        catDiv.innerHTML = `
-            <input type="text" 
-                   value="${gameData.categories[i]}" 
-                   placeholder="Category ${i + 1}"
-                   onfocus="clearDefaultCategory(this, ${i})"
-                   oninput="updateCategory(${i}, this.value)">
-        `;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = gameData.categories[i]; // set as a property so quotes/HTML in names are safe
+        input.placeholder = `Category ${i + 1}`;
+        input.onfocus = () => clearDefaultCategory(input, i);
+        input.oninput = () => updateCategory(i, input.value);
+        catDiv.appendChild(input);
         categoriesRow.appendChild(catDiv);
     }
     
@@ -119,7 +119,7 @@ function renderBoard() {
                 <div class="cell-value">$${cell.value}</div>
                 ${isDailyDouble ? '<div class="dd-indicator">DD</div>' : ''}
                 ${hasContent ? '<div class="content-indicator">●</div>' : ''}
-                ${previewContent ? '<div class="cell-preview">' + previewContent + '</div>' : ''}
+                ${previewContent ? '<div class="cell-preview">' + escapeHTML(previewContent) + '</div>' : ''}
             `;
             cellDiv.onclick = () => openCellEditor(cellIndex);
             questionsGrid.appendChild(cellDiv);
@@ -140,9 +140,31 @@ function updateCategory(index, value) {
 }
 
 function updateBoardSize() {
-    gameData.settings.numCategories = parseInt(document.getElementById('numCategories').value);
-    gameData.settings.numQuestions = parseInt(document.getElementById('numQuestions').value);
-    gameData.settings.dailyDoubles = []; // Reset daily doubles
+    const oldCats = gameData.settings.numCategories;
+    const newCats = parseInt(document.getElementById('numCategories').value);
+    const newQs = parseInt(document.getElementById('numQuestions').value);
+
+    // Remap cells by row/column so existing clues stay under their category
+    // when the board dimensions change, and recompute dollar values per row
+    const oldCells = gameData.cells;
+    const newCells = [];
+    for (let row = 0; row < newQs; row++) {
+        for (let col = 0; col < newCats; col++) {
+            const oldCell = col < oldCats ? oldCells[row * oldCats + col] : null;
+            newCells.push({
+                question: oldCell ? oldCell.question : '',
+                answer: oldCell ? oldCell.answer : '',
+                value: (row + 1) * 200,
+                mediaType: oldCell ? oldCell.mediaType : 'none',
+                mediaUrl: oldCell ? oldCell.mediaUrl : ''
+            });
+        }
+    }
+    gameData.cells = newCells;
+
+    gameData.settings.numCategories = newCats;
+    gameData.settings.numQuestions = newQs;
+    gameData.settings.dailyDoubles = []; // Reset daily doubles (indexes no longer match)
     initializeBoard();
     saveToURL();
 }
@@ -216,12 +238,20 @@ function truncateText(text, maxLength) {
     return text.substring(0, maxLength) + '...';
 }
 
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 // URL Management
+// replaceState (not pushState) — otherwise every keystroke creates a history
+// entry and the Back button becomes unusable
 function saveToURL() {
     gameData.title = document.getElementById('gameTitle').value;
     const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(gameData));
     const newURL = window.location.pathname + '#' + compressed;
-    window.history.pushState(gameData, '', newURL);
+    window.history.replaceState(gameData, '', newURL);
 }
 
 function loadFromURL() {
@@ -239,6 +269,7 @@ function loadFromURL() {
 }
 
 function shareEditor() {
+    saveToURL(); // Make sure the URL reflects the latest edits before copying
     const url = window.location.href;
     const button = document.querySelector('button[onclick="shareEditor()"]');
     const originalText = button.textContent;
@@ -254,6 +285,7 @@ function shareEditor() {
 }
 
 function sharePlayer() {
+    saveToURL(); // Make sure the URL reflects the latest edits before copying
     const hash = window.location.hash;
     const baseURL = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
     const playerURL = baseURL + '/player.html' + hash;

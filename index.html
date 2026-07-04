@@ -6,40 +6,70 @@
     <title>Static Jeopardy</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="home-body">
     <div class="container">
-        <header>
-            <h1>Static Jeopardy</h1>
-            <p class="tagline">Create and play Jeopardy games without a server!</p>
-        </header>
-        
-        <div class="home-content">
-            <div class="intro">
-                <h2>Welcome to Static Jeopardy</h2>
-                <p>Create and share Jeopardy-style game boards instantly. All data is stored in the URL - no accounts or servers needed!</p>
+        <header class="home-hero">
+            <div class="hero-badge">&#9733; America's 250th &middot; 1776&ndash;2026 &#9733;</div>
+            <div class="hero-title">
+                <span class="hero-word">STATIC</span>
+                <span class="hero-word hero-word-gold">JEOPARDY!</span>
             </div>
-            
+            <div class="stars-divider">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+            <p class="tagline">Create and play Jeopardy games without a server &mdash; the whole game lives in the URL.</p>
+        </header>
+
+        <div class="home-content">
             <div class="actions">
-                <a href="editor.html" class="btn btn-primary">
+                <a href="editor.html" class="btn btn-primary btn-large">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
-                    Create New Game
+                    Create a New Game
                 </a>
-                
+
+                <div class="or-divider">or</div>
+
+                <div class="load-game">
+                    <label for="gameUrl">Have a game link? Paste it here:</label>
+                    <input type="text" id="gameUrl" placeholder="https://.../player.html#..."
+                           onkeydown="if (event.key === 'Enter') loadGame()">
+                    <button onclick="loadGame()" class="btn btn-secondary">Load Game</button>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">&#128279;</div>
+                    <h3>No accounts, no servers</h3>
+                    <p>The entire board is compressed into the link. Share the URL and anyone can play.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#127916;</div>
+                    <h3>Media clues</h3>
+                    <p>Add images, video, or audio to any clue. Daily Doubles and Final Jeopardy included.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#127942;</div>
+                    <h3>Built-in scoreboard</h3>
+                    <p>Track team scores as you host. Progress is saved locally so you can pick up where you left off.</p>
+                </div>
+            </div>
         </div>
+
+        <footer class="home-footer">
+            <p>Fully static &middot; open the editor to get started</p>
+        </footer>
     </div>
-    
+
     <script>
         function loadGame() {
             const url = document.getElementById('gameUrl').value.trim();
-            if (url) {
-                if (url.includes('#')) {
-                    window.location.href = url;
-                } else {
-                    alert('Invalid game URL. Please paste a complete URL with game data.');
-                }
+            if (!url) return;
+            if (url.includes('#')) {
+                window.location.href = url;
+            } else {
+                alert('Invalid game URL. Please paste a complete URL with game data after the # symbol.');
             }
         }
     </script>
