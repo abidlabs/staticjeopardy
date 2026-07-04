@@ -409,7 +409,7 @@ body {
     text-align: center;
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: calc(clamp(0.8em, 1.4vw, 1.15em) * var(--cat-scale, 1));
+    font-size: calc(clamp(1em, 1.9vw, 1.6em) * var(--cat-scale, 1));
     line-height: 1.25;
     letter-spacing: 0.05em;
     border-radius: 4px 4px 0 0;

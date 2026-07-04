@@ -38,9 +38,9 @@ function loadFromURL() {
 function categoryScale(text) {
     const len = (text || '').length;
     if (len <= 14) return 1;
-    if (len <= 24) return 0.8;
-    if (len <= 40) return 0.68;
-    return 0.58;
+    if (len <= 28) return 0.9;
+    if (len <= 44) return 0.8;
+    return 0.7;
 }
 
 function escapeHTML(str) {
