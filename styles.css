@@ -850,6 +850,15 @@ body {
     border-radius: 8px;
 }
 
+.media-container .media-embed {
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
 .answer-content {
     font-family: var(--font-clue);
     font-size: 1.5em;

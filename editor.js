@@ -224,7 +224,9 @@ function updateMediaInput() {
         mediaUrlInput.style.display = 'none';
     } else {
         mediaUrlInput.style.display = 'block';
-        mediaUrlInput.placeholder = `Enter ${mediaType} URL`;
+        mediaUrlInput.placeholder = mediaType === 'video'
+            ? 'Enter video URL (YouTube, Vimeo, or direct .mp4 link)'
+            : `Enter ${mediaType} URL`;
     }
 }
 

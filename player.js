@@ -43,6 +43,16 @@ function categoryScale(text) {
     return 0.7;
 }
 
+// Convert YouTube/Vimeo page URLs into embeddable player URLs.
+// Returns null for anything else (direct media files, etc.)
+function getEmbedUrl(url) {
+    const yt = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+    const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+    if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+    return null;
+}
+
 function escapeHTML(str) {
     const div = document.createElement('div');
     div.textContent = str;
@@ -214,19 +224,29 @@ function showQuestion(cell, value, isDailyDouble = false) {
     // Handle media (built via DOM so URLs with quotes/special chars can't break the markup)
     mediaContainer.innerHTML = '';
     if (cell.mediaType && cell.mediaType !== 'none' && cell.mediaUrl) {
+        const embedUrl = getEmbedUrl(cell.mediaUrl);
         let mediaEl = null;
-        if (cell.mediaType === 'image') {
+        if (embedUrl) {
+            // YouTube/Vimeo links can't play in a <video> tag — embed their player
+            mediaEl = document.createElement('iframe');
+            mediaEl.src = embedUrl;
+            mediaEl.className = 'media-embed';
+            mediaEl.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            mediaEl.allowFullscreen = true;
+        } else if (cell.mediaType === 'image') {
             mediaEl = document.createElement('img');
             mediaEl.alt = 'Question media';
+            mediaEl.src = cell.mediaUrl;
         } else if (cell.mediaType === 'video') {
             mediaEl = document.createElement('video');
             mediaEl.controls = true;
+            mediaEl.src = cell.mediaUrl;
         } else if (cell.mediaType === 'audio') {
             mediaEl = document.createElement('audio');
             mediaEl.controls = true;
+            mediaEl.src = cell.mediaUrl;
         }
         if (mediaEl) {
-            mediaEl.src = cell.mediaUrl;
             mediaContainer.appendChild(mediaEl);
         }
     }
@@ -359,6 +379,9 @@ function closeQuestionModal() {
     }
 
     document.getElementById('questionModal').style.display = 'none';
+
+    // Remove media so embedded videos/audio stop playing behind the board
+    document.getElementById('mediaContainer').innerHTML = '';
 
     // Clear question timer if running
     if (questionTimer) {
