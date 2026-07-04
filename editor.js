@@ -72,14 +72,24 @@ function renderBoard() {
     for (let i = 0; i < numCats; i++) {
         const catDiv = document.createElement('div');
         catDiv.className = 'category-cell';
-        const input = document.createElement('input');
-        input.type = 'text';
+        // A textarea (not an input) so long category names wrap instead of clipping
+        const input = document.createElement('textarea');
+        input.rows = 1;
         input.value = gameData.categories[i]; // set as a property so quotes/HTML in names are safe
         input.placeholder = `Category ${i + 1}`;
+        const fit = () => {
+            catDiv.style.setProperty('--cat-scale', categoryScale(input.value));
+            input.style.height = 'auto';
+            input.style.height = input.scrollHeight + 'px';
+        };
         input.onfocus = () => clearDefaultCategory(input, i);
-        input.oninput = () => updateCategory(i, input.value);
+        input.oninput = () => {
+            updateCategory(i, input.value);
+            fit();
+        };
         catDiv.appendChild(input);
         categoriesRow.appendChild(catDiv);
+        fit();
     }
     
     // Render question cells
@@ -125,6 +135,15 @@ function renderBoard() {
             questionsGrid.appendChild(cellDiv);
         }
     }
+}
+
+// Shrink category text as it gets longer so it fits the cell
+function categoryScale(text) {
+    const len = (text || '').length;
+    if (len <= 14) return 1;
+    if (len <= 24) return 0.8;
+    if (len <= 40) return 0.68;
+    return 0.58;
 }
 
 function clearDefaultCategory(input, index) {

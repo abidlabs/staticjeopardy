@@ -34,6 +34,15 @@ function loadFromURL() {
     }
 }
 
+// Shrink category text as it gets longer so it fits the cell
+function categoryScale(text) {
+    const len = (text || '').length;
+    if (len <= 14) return 1;
+    if (len <= 24) return 0.8;
+    if (len <= 40) return 0.68;
+    return 0.58;
+}
+
 function escapeHTML(str) {
     const div = document.createElement('div');
     div.textContent = str;
@@ -89,7 +98,9 @@ function renderBoard() {
     for (let i = 0; i < numCats; i++) {
         const catDiv = document.createElement('div');
         catDiv.className = 'category-cell';
-        catDiv.textContent = gameData.categories[i] || `Category ${i + 1}`;
+        const name = gameData.categories[i] || `Category ${i + 1}`;
+        catDiv.textContent = name;
+        catDiv.style.setProperty('--cat-scale', categoryScale(name));
         categoriesRow.appendChild(catDiv);
     }
     
