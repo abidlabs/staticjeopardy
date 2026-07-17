@@ -1,0 +1,17 @@
+{
+  "name": "static-jeopardy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Create self-contained Static Jeopardy game URLs from the command line",
+  "homepage": "https://abidlabs.github.io/staticjeopardy/",
+  "bin": {
+    "static-jeopardy": "bin/static-jeopardy.js"
+  },
+  "scripts": {
+    "jeopardy": "node bin/static-jeopardy.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "lz-string": "1.5.0"
+  }
+}

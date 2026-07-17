@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abidlabs.github.io/staticjeopardy/game.schema.json",
+  "title": "Static Jeopardy authoring format",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "categories"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "categories": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/category" }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "questionTimerSeconds": { "type": "integer", "minimum": 0, "maximum": 300, "default": 0 }
+      }
+    },
+    "finalJeopardy": { "$ref": "#/$defs/finalJeopardy" }
+  },
+  "$defs": {
+    "category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "questions"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "questions": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 6,
+          "items": { "$ref": "#/$defs/question" }
+        }
+      }
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question", "answer"],
+      "properties": {
+        "question": { "type": "string", "minLength": 1 },
+        "answer": { "type": "string", "minLength": 1 },
+        "value": { "type": "integer", "minimum": 1 },
+        "dailyDouble": { "type": "boolean", "default": false },
+        "mediaType": { "enum": ["none", "image", "video", "audio"], "default": "none" },
+        "mediaUrl": { "type": "string", "default": "" }
+      }
+    },
+    "finalJeopardy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "question", "answer"],
+      "properties": {
+        "category": { "type": "string", "minLength": 1 },
+        "question": { "type": "string", "minLength": 1 },
+        "answer": { "type": "string", "minLength": 1 },
+        "timerSeconds": { "type": "integer", "minimum": 10, "maximum": 120, "default": 30 }
+      }
+    }
+  }
+}
