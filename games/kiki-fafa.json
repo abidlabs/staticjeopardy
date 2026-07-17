@@ -1,0 +1,89 @@
+{
+  "title": "kiki fafa",
+  "categories": [
+    {
+      "name": "Math Questions",
+      "questions": [
+        {
+          "question": "What is 2 + 1?",
+          "answer": "3"
+        },
+        {
+          "question": "What is 5 - 2?",
+          "answer": "3"
+        },
+        {
+          "question": "How many sides does a triangle have?",
+          "answer": "3 sides"
+        },
+        {
+          "question": "What number comes next: 2, 4, 6, __?",
+          "answer": "8"
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "questions": [
+        {
+          "question": "Which vehicle has two wheels and pedals?",
+          "answer": "A bicycle"
+        },
+        {
+          "question": "Which vehicle flies high in the sky?",
+          "answer": "An airplane"
+        },
+        {
+          "question": "Which long vehicle travels on railway tracks?",
+          "answer": "A train"
+        },
+        {
+          "question": "Which vehicle takes sick or hurt people to the hospital?",
+          "answer": "An ambulance"
+        }
+      ]
+    },
+    {
+      "name": "Countries and Capitals",
+      "questions": [
+        {
+          "question": "Paris is the capital of which country?",
+          "answer": "France"
+        },
+        {
+          "question": "London is the capital of which country?",
+          "answer": "The United Kingdom"
+        },
+        {
+          "question": "Cairo is the capital of which country?",
+          "answer": "Egypt"
+        },
+        {
+          "question": "Riyadh is the capital of which country?",
+          "answer": "Saudi Arabia"
+        }
+      ]
+    },
+    {
+      "name": "Prophets of Allah",
+      "questions": [
+        {
+          "question": "Who was the first human and the first prophet?",
+          "answer": "Prophet Adam (peace be upon him)"
+        },
+        {
+          "question": "Which prophet built a huge ark when Allah told him a flood was coming?",
+          "answer": "Prophet Nuh (peace be upon him)"
+        },
+        {
+          "question": "Which prophet helped his father, Prophet Ibrahim, build the Ka'bah?",
+          "answer": "Prophet Ismail (peace be upon him)"
+        },
+        {
+          "question": "Which prophet was swallowed by a big fish and prayed to Allah?",
+          "answer": "Prophet Yunus (peace be upon him)"
+        }
+      ]
+    }
+  ]
+}
